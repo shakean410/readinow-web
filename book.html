@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book a Move — Readi Now</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --teal: #00D4AA; --teal-dark: #00A882; --teal-glow: rgba(0,212,170,0.12);
+      --orange: #FF6B2C; --orange-glow: rgba(255,107,44,0.15);
+      --black: #080C0B; --dark: #0D1412; --card: #111918; --border: #1E2D29;
+      --text: #F4FEFA; --muted: #7ABFB0; --dim: #2A5A4A;
+      --green: #2ECC71; --blue: #3B9EFF; --red: #FF4D4D;
+    }
+    body { background: var(--black); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; }
+
+    /* NAV */
+    nav { padding: 16px 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: rgba(8,12,11,0.95); backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 100; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo-icon { width: 34px; height: 34px; background: linear-gradient(135deg, var(--teal), var(--teal-dark)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .nav-logo-text { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; text-transform: uppercase; color: var(--text); }
+    .nav-logo-text span { color: var(--teal); }
+    .nav-back { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: color 0.2s; }
+    .nav-back:hover { color: var(--text); }
+
+    /* LAYOUT */
+    .page { display: grid; grid-template-columns: 1fr 420px; min-height: calc(100vh - 65px); }
+    .main { padding: 48px; border-right: 1px solid var(--border); }
+    .sidebar { padding: 40px 32px; background: var(--dark); }
+
+    /* PROGRESS */
+    .progress-bar { display: flex; gap: 8px; margin-bottom: 40px; }
+    .progress-step { flex: 1; height: 3px; border-radius: 2px; background: var(--border); transition: background 0.4s; }
+    .progress-step.active { background: var(--teal); }
+    .progress-step.done { background: var(--teal); opacity: 0.4; }
+
+    /* STEP HEADER */
+    .step-label { font-size: 12px; font-weight: 700; color: var(--teal); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+    .step-title { font-family: 'Barlow Condensed', sans-serif; font-size: 40px; font-weight: 900; text-transform: uppercase; letter-spacing: -1px; margin-bottom: 8px; }
+    .step-sub { color: var(--muted); font-size: 15px; margin-bottom: 36px; }
+
+    /* FORM ELEMENTS */
+    .field-group { display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px; }
+    .field-label { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+    .input-wrap { position: relative; }
+    .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px; pointer-events: none; }
+    input[type=text], input[type=email], textarea, select {
+      width: 100%; height: 52px; background: var(--card); border: 1.5px solid var(--border);
+      border-radius: 12px; padding: 0 16px 0 42px; color: var(--text); font-size: 15px;
+      font-family: 'Barlow', sans-serif; outline: none; transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--teal); }
+    textarea { height: 90px; padding: 14px 16px 14px 42px; resize: none; }
+    select { appearance: none; cursor: pointer; }
+
+    /* SERVICE GRID */
+    .service-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 32px; }
+    .service-opt { background: var(--card); border: 1.5px solid var(--border); border-radius: 14px; padding: 18px; cursor: pointer; transition: all 0.2s; }
+    .service-opt:hover { border-color: var(--teal); }
+    .service-opt.selected { background: rgba(0,212,170,0.08); border-color: var(--teal); box-shadow: 0 0 20px var(--teal-glow); }
+    .service-opt-icon { font-size: 28px; margin-bottom: 8px; }
+    .service-opt-name { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; text-transform: uppercase; }
+    .service-opt-desc { color: var(--muted); font-size: 12px; margin-top: 3px; }
+
+    /* SIZE OPTIONS */
+    .size-opts { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .size-opt { display: flex; align-items: center; justify-content: space-between; background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 18px; cursor: pointer; transition: all 0.2s; }
+    .size-opt:hover { border-color: var(--teal); }
+    .size-opt.selected { background: rgba(0,212,170,0.08); border-color: var(--teal); }
+    .size-opt-info { display: flex; flex-direction: column; gap: 2px; }
+    .size-opt-name { font-weight: 700; font-size: 15px; }
+    .size-opt-desc { color: var(--muted); font-size: 12px; }
+    .size-opt-price { color: var(--teal); font-weight: 700; font-size: 14px; }
+    .radio-dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
+    .size-opt.selected .radio-dot { border-color: var(--teal); background: var(--teal); }
+    .size-opt.selected .radio-dot::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--black); }
+
+    /* FLOOR PILLS */
+    .floor-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+    .floor-pill { padding: 8px 16px; background: var(--card); border: 1.5px solid var(--border); border-radius: 100px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--muted); }
+    .floor-pill:hover { border-color: var(--teal); color: var(--text); }
+    .floor-pill.selected { background: rgba(0,212,170,0.1); border-color: var(--teal); color: var(--teal); }
+
+    /* QUOTE CARD */
+    .quote-loading { text-align: center; padding: 60px 0; }
+    .quote-spinner { width: 56px; height: 56px; border: 3px solid var(--border); border-top-color: var(--teal); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .quote-loading-text { color: var(--muted); font-size: 16px; }
+
+    .quote-result { display: none; }
+    .quote-result.show { display: block; }
+
+    .price-big { font-family: 'Barlow Condensed', sans-serif; font-size: 72px; font-weight: 900; color: var(--teal); line-height: 1; margin-bottom: 4px; }
+    .price-note { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+    .breakdown { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 24px; }
+    .breakdown-row { display: flex; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .breakdown-row:last-child { border-bottom: none; }
+    .breakdown-row.total { font-weight: 700; font-size: 15px; }
+    .breakdown-label { color: var(--muted); }
+    .breakdown-value { color: var(--text); }
+    .breakdown-row.total .breakdown-value { color: var(--teal); font-size: 18px; }
+
+    /* MOVER CARDS */
+    .mover-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .mover-card { display: flex; align-items: center; gap: 14px; background: var(--card); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 16px; cursor: pointer; transition: all 0.2s; }
+    .mover-card:hover { border-color: var(--teal); }
+    .mover-card.selected { background: rgba(0,212,170,0.07); border-color: var(--teal); }
+    .mover-avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 800; color: white; flex-shrink: 0; }
+    .mover-info { flex: 1; }
+    .mover-name { font-weight: 700; font-size: 14px; }
+    .mover-meta { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .mover-right { text-align: right; }
+    .mover-price { color: var(--orange); font-weight: 800; font-size: 17px; }
+    .mover-eta { color: var(--green); font-size: 12px; font-weight: 600; }
+
+    /* CONFIRM */
+    .confirm-card { background: rgba(0,212,170,0.06); border: 1.5px solid rgba(0,212,170,0.25); border-radius: 18px; padding: 28px; margin-bottom: 24px; }
+    .confirm-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; }
+    .confirm-label { color: var(--muted); }
+    .confirm-value { font-weight: 600; }
+
+    /* BUTTONS */
+    .btn { width: 100%; height: 54px; border: none; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.2s; font-family: 'Barlow', sans-serif; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-primary { background: linear-gradient(135deg, var(--orange), #FF8F5E); color: white; box-shadow: 0 4px 20px var(--orange-glow); }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(255,107,44,0.4); }
+    .btn-teal { background: linear-gradient(135deg, var(--teal), var(--teal-dark)); color: var(--black); }
+    .btn-teal:hover { transform: translateY(-1px); }
+    .btn-ghost { background: transparent; border: 1.5px solid var(--border); color: var(--muted); }
+    .btn-ghost:hover { border-color: var(--teal); color: var(--text); }
+    .btn-back { background: none; border: none; color: var(--muted); font-size: 14px; cursor: pointer; padding: 0; font-family: 'Barlow', sans-serif; margin-bottom: 12px; display: flex; align-items: center; gap: 4px; }
+    .btn-back:hover { color: var(--text); }
+
+    /* SIDEBAR */
+    .sidebar-title { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 20px; }
+    .summary-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+    .summary-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; font-size: 13px; }
+    .summary-row:last-child { margin-bottom: 0; }
+    .summary-key { color: var(--muted); }
+    .summary-val { font-weight: 600; text-align: right; max-width: 200px; }
+    .route-visual { display: flex; gap: 10px; align-items: stretch; padding: 14px; background: var(--black); border-radius: 12px; margin-top: 10px; }
+    .route-dots { display: flex; flex-direction: column; align-items: center; gap: 3px; margin-top: 4px; }
+    .dot-blue { width: 9px; height: 9px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
+    .dot-line { flex: 1; width: 2px; background: var(--border); min-height: 16px; }
+    .dot-orange { width: 9px; height: 9px; border-radius: 2px; background: var(--orange); flex-shrink: 0; }
+    .route-addrs { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .route-addr { font-size: 13px; color: var(--text); font-weight: 500; }
+    .route-addr-label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
+
+    .trust-items { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+    .trust-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+    .trust-icon { width: 28px; height: 28px; background: rgba(0,212,170,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+
+    /* SUCCESS */
+    .success-screen { display: none; text-align: center; padding: 80px 40px; }
+    .success-screen.show { display: flex; flex-direction: column; align-items: center; }
+    .success-icon { font-size: 72px; margin-bottom: 20px; animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+    @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .success-title { font-family: 'Barlow Condensed', sans-serif; font-size: 48px; font-weight: 900; text-transform: uppercase; margin-bottom: 12px; }
+    .success-sub { color: var(--muted); font-size: 16px; line-height: 1.6; max-width: 400px; }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .page { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .main { padding: 28px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-icon">🚚</div>
+    <span class="nav-logo-text">Readi<span>Now</span></span>
+  </a>
+  <a href="index.html" class="nav-back">← Back to Home</a>
+</nav>
+
+<div class="page" id="bookingPage">
+
+  <!-- MAIN CONTENT -->
+  <div class="main" id="mainContent">
+
+    <!-- Progress bar -->
+    <div class="progress-bar" id="progressBar">
+      <div class="progress-step active" id="p1"></div>
+      <div class="progress-step" id="p2"></div>
+      <div class="progress-step" id="p3"></div>
+      <div class="progress-step" id="p4"></div>
+      <div class="progress-step" id="p5"></div>
+    </div>
+
+    <!-- STEP 1: Service Type -->
+    <div id="step1">
+      <div class="step-label">Step 1 of 5</div>
+      <h1 class="step-title">What Do You<br /><span style="color:var(--teal)">Need?</span></h1>
+      <p class="step-sub">Select the type of service you're looking for.</p>
+      <div class="service-grid">
+        <div class="service-opt" onclick="selectService('fullmove', this)">
+          <div class="service-opt-icon">🏠</div>
+          <div class="service-opt-name">Full Move</div>
+          <div class="service-opt-desc">Furniture & boxes</div>
+        </div>
+        <div class="service-opt" onclick="selectService('haulaway', this)">
+          <div class="service-opt-icon">🗑️</div>
+          <div class="service-opt-name">Haul Away</div>
+          <div class="service-opt-desc">Junk & disposal</div>
+        </div>
+        <div class="service-opt" onclick="selectService('delivery', this)">
+          <div class="service-opt-icon">📦</div>
+          <div class="service-opt-name">Delivery</div>
+          <div class="service-opt-desc">Single item</div>
+        </div>
+        <div class="service-opt" onclick="selectService('labor', this)">
+          <div class="service-opt-icon">💪</div>
+          <div class="service-opt-name">Labor Only</div>
+          <div class="service-opt-desc">You drive, we lift</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="step1Btn" onclick="goStep(2)" disabled>Continue →</button>
+    </div>
+
+    <!-- STEP 2: Addresses -->
+    <div id="step2" style="display:none">
+      <button class="btn-back" onclick="goStep(1)">← Back</button>
+      <div class="step-label">Step 2 of 5</div>
+      <h1 class="step-title">Your<br /><span style="color:var(--teal)">Locations</span></h1>
+      <p class="step-sub">Where should the mover go?</p>
+      <div class="field-group">
+        <div>
+          <div class="field-label">Pickup Address</div>
+          <div class="input-wrap">
+            <span class="input-icon">📍</span>
+            <input type="text" id="pickupInput" placeholder="Enter pickup address..." oninput="updateSummary()" />
+          </div>
+        </div>
+        <div>
+          <div class="field-label">Drop-off Address</div>
+          <div class="input-wrap">
+            <span class="input-icon">🏁</span>
+            <input type="text" id="dropoffInput" placeholder="Enter drop-off address..." oninput="updateSummary()" />
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="goStep(3)">Continue →</button>
+    </div>
+
+    <!-- STEP 3: Job Details -->
+    <div id="step3" style="display:none">
+      <button class="btn-back" onclick="goStep(2)">← Back</button>
+      <div class="step-label">Step 3 of 5</div>
+      <h1 class="step-title">Job<br /><span style="color:var(--teal)">Details</span></h1>
+      <p class="step-sub">Help us give you an accurate quote.</p>
+
+      <div class="field-label">Move Size</div>
+      <div class="size-opts">
+        <div class="size-opt" onclick="selectSize('small', this, 85)">
+          <div class="size-opt-info">
+            <div class="size-opt-name">Small — Studio / 1 Bedroom</div>
+            <div class="size-opt-desc">1–2 rooms · approx 2 hrs</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px">
+            <div class="size-opt-price">From $85</div>
+            <div class="radio-dot"></div>
+          </div>
+        </div>
+        <div class="size-opt" onclick="selectSize('medium', this, 145)">
+          <div class="size-opt-info">
+            <div class="size-opt-name">Medium — 2–3 Bedroom</div>
+            <div class="size-opt-desc">3–5 rooms · approx 4 hrs</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px">
+            <div class="size-opt-price">From $145</div>
+            <div class="radio-dot"></div>
+          </div>
+        </div>
+        <div class="size-opt" onclick="selectSize('large', this, 210)">
+          <div class="size-opt-info">
+            <div class="size-opt-name">Large — 4+ Bedroom</div>
+            <div class="size-opt-desc">6+ rooms · 6+ hrs</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px">
+            <div class="size-opt-price">From $210</div>
+            <div class="radio-dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-label">Stairs / Access</div>
+      <div class="floor-pills">
+        <div class="floor-pill selected" onclick="selectFloor('Ground', this)">Ground Floor</div>
+        <div class="floor-pill" onclick="selectFloor('1 Flight', this)">1 Flight (+$20)</div>
+        <div class="floor-pill" onclick="selectFloor('2+ Flights', this)">2+ Flights (+$45)</div>
+        <div class="floor-pill" onclick="selectFloor('Elevator', this)">Elevator (+$10)</div>
+      </div>
+
+      <div class="field-label" style="margin-bottom:8px">Special Notes (optional)</div>
+      <div class="input-wrap" style="margin-bottom:28px">
+        <span class="input-icon" style="top:18px;transform:none">📝</span>
+        <textarea id="notesInput" placeholder="e.g. Large piano, fragile items, gate code..."></textarea>
+      </div>
+
+      <button class="btn btn-primary" onclick="goStep(4)">Get My Quote →</button>
+    </div>
+
+    <!-- STEP 4: Quote -->
+    <div id="step4" style="display:none">
+      <button class="btn-back" onclick="goStep(3)">← Back</button>
+      <div class="step-label">Step 4 of 5</div>
+      <h1 class="step-title">Your<br /><span style="color:var(--teal)">Instant Quote</span></h1>
+      <p class="step-sub">Based on your job details — locked in before you book.</p>
+
+      <div class="quote-loading" id="quoteLoading">
+        <div class="quote-spinner"></div>
+        <div class="quote-loading-text">Finding movers near you...</div>
+      </div>
+
+      <div class="quote-result" id="quoteResult">
+        <div class="price-big" id="quotePriceBig">$185</div>
+        <div class="price-note">Estimated total · Final price confirmed after job</div>
+
+        <div class="breakdown">
+          <div class="breakdown-row"><span class="breakdown-label">Base rate</span><span class="breakdown-value" id="bBase">$136</span></div>
+          <div class="breakdown-row"><span class="breakdown-label">Labor</span><span class="breakdown-value" id="bLabor">$88</span></div>
+          <div class="breakdown-row"><span class="breakdown-label">Fuel surcharge</span><span class="breakdown-value" id="bFuel">$16</span></div>
+          <div class="breakdown-row total"><span class="breakdown-label">Total</span><span class="breakdown-value" id="bTotal">$240</span></div>
+        </div>
+
+        <div class="field-label" style="margin-bottom:12px">Available Movers</div>
+        <div class="mover-cards" id="moverCards"></div>
+
+        <button class="btn btn-primary" onclick="goStep(5)">Book Now →</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: Confirm -->
+    <div id="step5" style="display:none">
+      <button class="btn-back" onclick="goStep(4)">← Back</button>
+      <div class="step-label">Step 5 of 5</div>
+      <h1 class="step-title">Confirm<br /><span style="color:var(--teal)">Your Booking</span></h1>
+      <p class="step-sub">Review your details and confirm your move.</p>
+
+      <div class="confirm-card">
+        <div class="confirm-row"><span class="confirm-label">Service</span><span class="confirm-value" id="confirmService">Full Move</span></div>
+        <div class="confirm-row"><span class="confirm-label">Size</span><span class="confirm-value" id="confirmSize">Medium</span></div>
+        <div class="confirm-row"><span class="confirm-label">Mover</span><span class="confirm-value" id="confirmMover">DeShawn M.</span></div>
+        <div class="confirm-row"><span class="confirm-label">Arriving in</span><span class="confirm-value" style="color:var(--green)" id="confirmEta">~4 min</span></div>
+        <div style="height:1px;background:var(--border);margin:4px 0 12px"></div>
+        <div class="confirm-row"><span class="confirm-label" style="font-weight:700">Total</span><span class="confirm-value" style="color:var(--teal);font-size:20px;font-weight:800" id="confirmTotal">$240</span></div>
+      </div>
+
+      <div class="field-label" style="margin-bottom:8px">Payment Method</div>
+      <div class="field-group" style="margin-bottom:28px">
+        <div class="input-wrap">
+          <span class="input-icon">💳</span>
+          <input type="text" placeholder="Card number" />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="input-wrap"><span class="input-icon">📅</span><input type="text" placeholder="MM / YY" /></div>
+          <div class="input-wrap"><span class="input-icon">🔒</span><input type="text" placeholder="CVC" /></div>
+        </div>
+      </div>
+
+      <button class="btn btn-teal" onclick="confirmBooking()" style="margin-bottom:10px">✓ Confirm & Book — <span id="finalPrice">$240</span></button>
+      <button class="btn btn-ghost" onclick="goStep(4)">← Change Mover</button>
+    </div>
+  </div>
+
+  <!-- SUCCESS OVERLAY -->
+  <div class="success-screen" id="successScreen" style="display:none;position:fixed;inset:0;background:var(--black);z-index:200;justify-content:center;">
+    <div class="success-icon">✅</div>
+    <h2 class="success-title">Mover<br /><span style="color:var(--teal)">Booked!</span></h2>
+    <p class="success-sub" style="margin-bottom:32px">Your mover is on the way. Track them live in real time.</p>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;width:100%;max-width:400px;margin-bottom:24px">
+      <div class="confirm-row"><span class="confirm-label">Booking ID</span><span class="confirm-value">#RDN-4821</span></div>
+      <div class="confirm-row"><span class="confirm-label">Mover</span><span class="confirm-value" id="successMover">DeShawn M.</span></div>
+      <div class="confirm-row"><span class="confirm-label">ETA</span><span class="confirm-value" style="color:var(--green)">~4 minutes</span></div>
+      <div class="confirm-row"><span class="confirm-label">Total</span><span class="confirm-value" style="color:var(--teal);font-size:18px;font-weight:800" id="successTotal">$240</span></div>
+    </div>
+    <button class="btn btn-primary" style="max-width:400px;width:100%" onclick="window.location='index.html'">🗺 Track My Mover →</button>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-title">Your Booking Summary</div>
+
+    <div class="summary-card" id="summaryService" style="opacity:0.3">
+      <div class="summary-row"><span class="summary-key">Service</span><span class="summary-val" id="sumService">—</span></div>
+      <div class="summary-row"><span class="summary-key">Size</span><span class="summary-val" id="sumSize">—</span></div>
+      <div class="summary-row"><span class="summary-key">Access</span><span class="summary-val" id="sumFloor">Ground Floor</span></div>
+    </div>
+
+    <div class="summary-card" id="summaryRoute" style="opacity:0.3">
+      <div class="route-visual">
+        <div class="route-dots">
+          <div class="dot-blue"></div>
+          <div class="dot-line"></div>
+          <div class="dot-orange"></div>
+        </div>
+        <div class="route-addrs">
+          <div>
+            <div class="route-addr-label">Pickup</div>
+            <div class="route-addr" id="sumPickup">Not set</div>
+          </div>
+          <div>
+            <div class="route-addr-label">Drop-off</div>
+            <div class="route-addr" id="sumDropoff">Not set</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-card" id="summaryPrice" style="opacity:0.3;text-align:center">
+      <div style="color:var(--muted);font-size:12px;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">Estimated Total</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:48px;font-weight:900;color:var(--teal)" id="sumPrice">—</div>
+      <div style="color:var(--dim);font-size:12px">Upfront · No hidden fees</div>
+    </div>
+
+    <div class="trust-items">
+      <div class="trust-item"><div class="trust-icon">✓</div>Verified & background-checked movers</div>
+      <div class="trust-item"><div class="trust-icon">🔒</div>Secure payment via Stripe</div>
+      <div class="trust-item"><div class="trust-icon">📍</div>Live GPS tracking included</div>
+      <div class="trust-item"><div class="trust-icon">⭐</div>4.9 average rating · 2,400+ moves</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let state = { service: null, size: null, basePrice: 85, floor: 'Ground', selectedMover: 0 };
+
+  const movers = [
+    { name: 'DeShawn M.', rating: '4.9', jobs: 312, truck: '26ft Box Truck', eta: '4 min', mult: 1.0, avatar: 'D', color: '#FF6B2C' },
+    { name: 'Carlos R.', rating: '4.8', jobs: 189, truck: 'Cargo Van', eta: '7 min', mult: 0.88, avatar: 'C', color: '#3B9EFF' },
+    { name: 'Troy & Team', rating: '5.0', jobs: 94, truck: '2-Person Crew', eta: '12 min', mult: 1.15, avatar: 'T', color: '#2ECC71' },
+  ];
+
+  const serviceNames = { fullmove: 'Full Move', haulaway: 'Haul Away', delivery: 'Delivery', labor: 'Labor Only' };
+  const sizeNames = { small: 'Small (Studio/1BR)', medium: 'Medium (2–3BR)', large: 'Large (4+BR)' };
+  const floorAdd = { 'Ground': 0, '1 Flight': 20, '2+ Flights': 45, 'Elevator': 10 };
+
+  function selectService(type, el) {
+    document.querySelectorAll('.service-opt').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+    state.service = type;
+    document.getElementById('step1Btn').disabled = false;
+    document.getElementById('sumService').textContent = serviceNames[type];
+    document.getElementById('summaryService').style.opacity = '1';
+  }
+
+  function selectSize(size, el, price) {
+    document.querySelectorAll('.size-opt').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+    state.size = size;
+    state.basePrice = price;
+    document.getElementById('sumSize').textContent = sizeNames[size];
+  }
+
+  function selectFloor(floor, el) {
+    document.querySelectorAll('.floor-pill').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+    state.floor = floor;
+    document.getElementById('sumFloor').textContent = floor;
+  }
+
+  function updateSummary() {
+    const pickup = document.getElementById('pickupInput').value;
+    const dropoff = document.getElementById('dropoffInput').value;
+    if (pickup) { document.getElementById('sumPickup').textContent = pickup; document.getElementById('summaryRoute').style.opacity = '1'; }
+    if (dropoff) document.getElementById('sumDropoff').textContent = dropoff;
+  }
+
+  function calcPrice(mult = 1) {
+    const base = state.basePrice + (floorAdd[state.floor] || 0);
+    const labor = Math.round(base * 0.65);
+    const fuel = 16;
+    return { base, labor, fuel, total: Math.round((base + labor + fuel) * mult) };
+  }
+
+  function goStep(n) {
+    for (let i = 1; i <= 5; i++) {
+      const el = document.getElementById('step' + i);
+      if (el) el.style.display = i === n ? 'block' : 'none';
+    }
+    // Update progress
+    for (let i = 1; i <= 5; i++) {
+      const p = document.getElementById('p' + i);
+      if (!p) continue;
+      p.className = 'progress-step' + (i < n ? ' done' : i === n ? ' active' : '');
+    }
+    if (n === 4) loadQuote();
+    if (n === 5) loadConfirm();
+    window.scrollTo(0, 0);
+  }
+
+  function loadQuote() {
+    document.getElementById('quoteLoading').style.display = 'block';
+    document.getElementById('quoteResult').classList.remove('show');
+    setTimeout(() => {
+      document.getElementById('quoteLoading').style.display = 'none';
+      const p = calcPrice();
+      document.getElementById('quotePriceBig').textContent = '$' + p.total;
+      document.getElementById('bBase').textContent = '$' + p.base;
+      document.getElementById('bLabor').textContent = '$' + p.labor;
+      document.getElementById('bFuel').textContent = '$' + p.fuel;
+      document.getElementById('bTotal').textContent = '$' + p.total;
+      document.getElementById('sumPrice').textContent = '$' + p.total;
+      document.getElementById('summaryPrice').style.opacity = '1';
+
+      // Render mover cards
+      const container = document.getElementById('moverCards');
+      container.innerHTML = '';
+      movers.forEach((m, i) => {
+        const price = Math.round(p.total * m.mult);
+        const card = document.createElement('div');
+        card.className = 'mover-card' + (i === 0 ? ' selected' : '');
+        card.innerHTML = `
+          <div class="mover-avatar" style="background:${m.color}">${m.avatar}</div>
+          <div class="mover-info">
+            <div class="mover-name">${m.name}</div>
+            <div class="mover-meta">★ ${m.rating} · ${m.jobs} jobs · ${m.truck}</div>
+          </div>
+          <div class="mover-right">
+            <div class="mover-price">$${price}</div>
+            <div class="mover-eta">🕐 ${m.eta}</div>
+          </div>`;
+        card.onclick = () => {
+          document.querySelectorAll('.mover-card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          state.selectedMover = i;
+        };
+        container.appendChild(card);
+      });
+
+      document.getElementById('quoteResult').classList.add('show');
+    }, 2000);
+  }
+
+  function loadConfirm() {
+    const m = movers[state.selectedMover];
+    const p = calcPrice(m.mult);
+    document.getElementById('confirmService').textContent = serviceNames[state.service] || '—';
+    document.getElementById('confirmSize').textContent = sizeNames[state.size] || '—';
+    document.getElementById('confirmMover').textContent = m.name;
+    document.getElementById('confirmEta').textContent = '~' + m.eta;
+    document.getElementById('confirmTotal').textContent = '$' + p.total;
+    document.getElementById('finalPrice').textContent = '$' + p.total;
+  }
+
+  function confirmBooking() {
+    const m = movers[state.selectedMover];
+    const p = calcPrice(m.mult);
+    document.getElementById('successMover').textContent = m.name;
+    document.getElementById('successTotal').textContent = '$' + p.total;
+    const s = document.getElementById('successScreen');
+    s.style.display = 'flex';
+    setTimeout(() => s.style.opacity = '1', 10);
+  }
+</script>
+</body>
+</html>

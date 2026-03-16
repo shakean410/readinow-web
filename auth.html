@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up / Log In — Readi Now</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --teal: #00D4AA; --teal-dark: #00A882; --teal-glow: rgba(0,212,170,0.12);
+      --orange: #FF6B2C; --orange-glow: rgba(255,107,44,0.15);
+      --black: #080C0B; --dark: #0D1412; --card: #111918; --border: #1E2D29;
+      --text: #F4FEFA; --muted: #7ABFB0; --dim: #2A5A4A;
+      --green: #2ECC71; --red: #FF4D4D;
+    }
+    body { background: var(--black); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* LAYOUT */
+    .auth-page { flex: 1; display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; }
+
+    /* LEFT PANEL */
+    .auth-left {
+      background: linear-gradient(160deg, #0D1A16 0%, #080C0B 100%);
+      border-right: 1px solid var(--border);
+      padding: 60px 56px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+    .auth-left-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 60% at 30% 40%, rgba(0,212,170,0.06) 0%, transparent 60%);
+    }
+    .auth-grid {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(0,212,170,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,170,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    .auth-left-logo { position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; text-decoration: none; margin-bottom: 0; }
+    .auth-left-logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--teal), var(--teal-dark)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .auth-left-logo-text { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 800; text-transform: uppercase; color: var(--text); }
+    .auth-left-logo-text span { color: var(--teal); }
+    .auth-left-body { position: relative; z-index: 1; }
+    .auth-left-title { font-family: 'Barlow Condensed', sans-serif; font-size: 52px; font-weight: 900; text-transform: uppercase; letter-spacing: -1.5px; line-height: 0.95; margin-bottom: 18px; }
+    .auth-left-sub { color: var(--muted); font-size: 16px; line-height: 1.6; max-width: 360px; margin-bottom: 40px; }
+    .auth-perks { display: flex; flex-direction: column; gap: 14px; }
+    .auth-perk { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--muted); }
+    .auth-perk-icon { width: 32px; height: 32px; background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.2); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+    .auth-left-footer { position: relative; z-index: 1; color: var(--dim); font-size: 12px; }
+
+    /* RIGHT PANEL */
+    .auth-right { padding: 60px 56px; display: flex; flex-direction: column; justify-content: center; }
+    .auth-tab-bar { display: flex; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 4px; gap: 4px; margin-bottom: 36px; }
+    .auth-tab { flex: 1; height: 40px; border: none; border-radius: 11px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Barlow', sans-serif; transition: all 0.2s; }
+    .auth-tab.active { background: var(--teal); color: var(--black); }
+    .auth-tab.inactive { background: transparent; color: var(--muted); }
+
+    /* FORM */
+    .auth-form { display: flex; flex-direction: column; gap: 0; }
+    .auth-form-title { font-family: 'Barlow Condensed', sans-serif; font-size: 36px; font-weight: 900; text-transform: uppercase; letter-spacing: -0.5px; margin-bottom: 6px; }
+    .auth-form-sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+    /* Social */
+    .social-btns { display: flex; gap: 10px; margin-bottom: 24px; }
+    .social-btn { flex: 1; height: 46px; background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--text); cursor: pointer; font-family: 'Barlow', sans-serif; transition: all 0.2s; }
+    .social-btn:hover { border-color: var(--teal); }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .divider-line { flex: 1; height: 1px; background: var(--border); }
+    .divider-text { color: var(--dim); font-size: 12px; }
+
+    /* Fields */
+    .field { margin-bottom: 16px; }
+    .field-label { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 7px; display: block; }
+    .input-wrap { position: relative; }
+    .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 15px; pointer-events: none; }
+    input[type=text], input[type=email], input[type=password], input[type=tel] {
+      width: 100%; height: 50px; background: var(--card); border: 1.5px solid var(--border);
+      border-radius: 12px; padding: 0 16px 0 42px; color: var(--text); font-size: 15px;
+      font-family: 'Barlow', sans-serif; outline: none; transition: border-color 0.2s;
+    }
+    input:focus { border-color: var(--teal); }
+    .input-action { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--dim); font-size: 12px; cursor: pointer; font-weight: 600; }
+    .input-action:hover { color: var(--teal); }
+
+    /* Role selector */
+    .role-select { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .role-opt { background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 16px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px; }
+    .role-opt:hover { border-color: var(--teal); }
+    .role-opt.selected { background: rgba(0,212,170,0.08); border-color: var(--teal); }
+    .role-opt-icon { font-size: 22px; }
+    .role-opt-title { font-weight: 700; font-size: 14px; }
+    .role-opt-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+    /* Password strength */
+    .pw-strength { display: flex; gap: 4px; margin-top: 6px; align-items: center; }
+    .pw-bar { flex: 1; height: 3px; border-radius: 2px; background: var(--border); transition: background 0.3s; }
+    .pw-label { font-size: 11px; color: var(--muted); margin-left: 4px; }
+
+    /* Submit */
+    .submit-btn { width: 100%; height: 52px; border: none; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; font-family: 'Barlow', sans-serif; margin-top: 8px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .submit-btn.orange { background: linear-gradient(135deg, var(--orange), #FF8F5E); color: white; box-shadow: 0 4px 20px var(--orange-glow); }
+    .submit-btn.orange:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(255,107,44,0.4); }
+    .submit-btn.teal { background: linear-gradient(135deg, var(--teal), var(--teal-dark)); color: var(--black); }
+    .submit-btn.teal:hover { transform: translateY(-1px); }
+
+    .auth-footer-text { text-align: center; color: var(--muted); font-size: 13px; margin-top: 16px; }
+    .auth-footer-text a { color: var(--teal); text-decoration: none; font-weight: 700; }
+    .auth-footer-text a:hover { text-decoration: underline; }
+    .terms-text { text-align: center; color: var(--dim); font-size: 11px; margin-top: 14px; line-height: 1.5; }
+    .terms-text a { color: var(--dim); }
+
+    /* SPINNER */
+    .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Forgot password */
+    .forgot-link { text-align: right; margin-top: -8px; margin-bottom: 16px; }
+    .forgot-link a { color: var(--teal); font-size: 13px; font-weight: 600; text-decoration: none; }
+
+    /* RESPONSIVE */
+    @media (max-width: 860px) {
+      .auth-page { grid-template-columns: 1fr; }
+      .auth-left { display: none; }
+      .auth-right { padding: 40px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="auth-page">
+
+  <!-- LEFT PANEL -->
+  <div class="auth-left">
+    <div class="auth-left-bg"></div>
+    <div class="auth-grid"></div>
+    <a href="index.html" class="auth-left-logo">
+      <div class="auth-left-logo-icon">🚚</div>
+      <span class="auth-left-logo-text">Readi<span>Now</span></span>
+    </a>
+    <div class="auth-left-body">
+      <h2 class="auth-left-title">Move Smarter.<br /><span style="color:var(--teal)">Earn More.</span></h2>
+      <p class="auth-left-sub">Join thousands of customers and movers on Readi Now — the fastest way to book or find moving jobs on demand.</p>
+      <div class="auth-perks">
+        <div class="auth-perk"><div class="auth-perk-icon">⚡</div>Book a mover in under 60 seconds</div>
+        <div class="auth-perk"><div class="auth-perk-icon">📍</div>Live GPS tracking on every job</div>
+        <div class="auth-perk"><div class="auth-perk-icon">💵</div>Upfront pricing — no surprises</div>
+        <div class="auth-perk"><div class="auth-perk-icon">✓</div>Verified & background-checked movers</div>
+        <div class="auth-perk"><div class="auth-perk-icon">🚚</div>Earn $20–$35/hr as a provider</div>
+      </div>
+    </div>
+    <div class="auth-left-footer">© 2025 Readi Now Inc.</div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="auth-right">
+
+    <!-- Tab switcher -->
+    <div class="auth-tab-bar">
+      <button class="auth-tab active" id="tabSignup" onclick="showTab('signup')">Create Account</button>
+      <button class="auth-tab inactive" id="tabLogin" onclick="showTab('login')">Log In</button>
+    </div>
+
+    <!-- SIGN UP FORM -->
+    <div id="signupForm">
+      <h2 class="auth-form-title">Create Your<br /><span style="color:var(--teal)">Account</span></h2>
+      <p class="auth-form-sub">Join Readi Now — it's free to sign up.</p>
+
+      <div class="social-btns">
+        <button class="social-btn">🍎 Apple</button>
+        <button class="social-btn"><span style="color:#4285F4;font-weight:900;font-size:13px">G</span> Google</button>
+      </div>
+
+      <div class="divider">
+        <div class="divider-line"></div>
+        <span class="divider-text">or sign up with email</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Full Name</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="signupName" placeholder="Jordan Smith" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Email Address</label>
+        <div class="input-wrap">
+          <span class="input-icon">✉️</span>
+          <input type="email" id="signupEmail" placeholder="you@email.com" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Phone Number</label>
+        <div class="input-wrap">
+          <span class="input-icon">📱</span>
+          <input type="tel" id="signupPhone" placeholder="+1 (512) 555-0142" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="signupPassword" placeholder="Min. 6 characters" oninput="checkPassword(this.value)" />
+          <span class="input-action" onclick="togglePw('signupPassword', this)">Show</span>
+        </div>
+        <div class="pw-strength">
+          <div class="pw-bar" id="pw1"></div>
+          <div class="pw-bar" id="pw2"></div>
+          <div class="pw-bar" id="pw3"></div>
+          <div class="pw-bar" id="pw4"></div>
+          <span class="pw-label" id="pwLabel"></span>
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:20px">
+        <label class="field-label" style="margin-bottom:10px">I am a...</label>
+        <div class="role-select">
+          <div class="role-opt selected" id="roleCustomer" onclick="selectRole('customer')">
+            <span class="role-opt-icon">📦</span>
+            <div>
+              <div class="role-opt-title">Customer</div>
+              <div class="role-opt-sub">I need a mover</div>
+            </div>
+          </div>
+          <div class="role-opt" id="roleProvider" onclick="selectRole('provider')">
+            <span class="role-opt-icon">🚚</span>
+            <div>
+              <div class="role-opt-title">Mover</div>
+              <div class="role-opt-sub">I want to earn</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="submit-btn orange" onclick="handleSignup()">
+        <span id="signupBtnText">Create Account →</span>
+        <div class="spinner" id="signupSpinner"></div>
+      </button>
+
+      <p class="terms-text">By creating an account you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
+      <p class="auth-footer-text">Already have an account? <a onclick="showTab('login')">Log in</a></p>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm" style="display:none">
+      <h2 class="auth-form-title">Welcome<br /><span style="color:var(--teal)">Back 👋</span></h2>
+      <p class="auth-form-sub">Log in to your Readi Now account.</p>
+
+      <div class="social-btns">
+        <button class="social-btn">🍎 Apple</button>
+        <button class="social-btn"><span style="color:#4285F4;font-weight:900;font-size:13px">G</span> Google</button>
+      </div>
+
+      <div class="divider">
+        <div class="divider-line"></div>
+        <span class="divider-text">or log in with email</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Email Address</label>
+        <div class="input-wrap">
+          <span class="input-icon">✉️</span>
+          <input type="email" id="loginEmail" placeholder="you@email.com" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Password</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="loginPassword" placeholder="Your password" />
+          <span class="input-action" onclick="togglePw('loginPassword', this)">Show</span>
+        </div>
+      </div>
+
+      <div class="forgot-link"><a href="#">Forgot password?</a></div>
+
+      <button class="submit-btn teal" onclick="handleLogin()">
+        <span id="loginBtnText">Log In →</span>
+        <div class="spinner" id="loginSpinner"></div>
+      </button>
+
+      <p class="auth-footer-text">Don't have an account? <a onclick="showTab('signup')">Sign up free</a></p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function showTab(tab) {
+    const isSignup = tab === 'signup';
+    document.getElementById('signupForm').style.display = isSignup ? 'block' : 'none';
+    document.getElementById('loginForm').style.display = isSignup ? 'none' : 'block';
+    document.getElementById('tabSignup').className = 'auth-tab ' + (isSignup ? 'active' : 'inactive');
+    document.getElementById('tabLogin').className = 'auth-tab ' + (!isSignup ? 'active' : 'inactive');
+  }
+
+  function togglePw(id, btn) {
+    const input = document.getElementById(id);
+    const isText = input.type === 'text';
+    input.type = isText ? 'password' : 'text';
+    btn.textContent = isText ? 'Show' : 'Hide';
+  }
+
+  function checkPassword(val) {
+    const colors = ['#FF4D4D', '#F0C040', '#FF6B2C', '#2ECC71'];
+    const labels = ['Weak', 'Fair', 'Good', 'Strong'];
+    const score = Math.min(Math.floor(val.length / 3), 3);
+    for (let i = 0; i < 4; i++) {
+      document.getElementById('pw' + (i + 1)).style.background = i <= score && val.length > 0 ? colors[score] : 'var(--border)';
+    }
+    document.getElementById('pwLabel').textContent = val.length > 0 ? labels[score] : '';
+    document.getElementById('pwLabel').style.color = colors[score];
+  }
+
+  function selectRole(role) {
+    document.getElementById('roleCustomer').classList.toggle('selected', role === 'customer');
+    document.getElementById('roleProvider').classList.toggle('selected', role === 'provider');
+  }
+
+  function handleSignup() {
+    const btn = document.getElementById('signupBtnText');
+    const spinner = document.getElementById('signupSpinner');
+    btn.textContent = 'Creating account...';
+    spinner.style.display = 'block';
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 1800);
+  }
+
+  function handleLogin() {
+    const btn = document.getElementById('loginBtnText');
+    const spinner = document.getElementById('loginSpinner');
+    btn.textContent = 'Logging in...';
+    spinner.style.display = 'block';
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 1600);
+  }
+</script>
+
+</body>
+</html>

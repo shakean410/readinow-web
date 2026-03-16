@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Readi Now — On-Demand Moving & Hauling</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal: #00D4AA;
+      --teal-dark: #00A882;
+      --teal-glow: rgba(0,212,170,0.15);
+      --orange: #FF6B2C;
+      --orange-glow: rgba(255,107,44,0.15);
+      --black: #080C0B;
+      --dark: #0D1412;
+      --card: #111918;
+      --border: #1E2D29;
+      --text: #F4FEFA;
+      --muted: #7ABFB0;
+      --dim: #2A5A4A;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--text);
+      font-family: 'Barlow', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── Noise texture overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 18px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(8,12,11,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      transition: all 0.3s;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .nav-logo-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .nav-logo-text {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+
+    .nav-logo-text span { color: var(--teal); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--teal);
+      color: var(--teal);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--orange), #FF8F5E);
+      color: white;
+      box-shadow: 0 4px 20px var(--orange-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 28px rgba(255,107,44,0.4);
+    }
+
+    .btn-teal {
+      background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+      color: var(--black);
+      box-shadow: 0 4px 20px var(--teal-glow);
+    }
+
+    .btn-teal:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 28px rgba(0,212,170,0.35);
+    }
+
+    .btn-lg {
+      padding: 16px 36px;
+      font-size: 16px;
+      border-radius: 14px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      padding: 120px 48px 80px;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 60% at 70% 40%, rgba(0,212,170,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 20% 80%, rgba(255,107,44,0.06) 0%, transparent 50%),
+        linear-gradient(160deg, #0D1412 0%, #080C0B 100%);
+    }
+
+    /* Animated grid */
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,170,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,170,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 680px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,212,170,0.1);
+      border: 1px solid rgba(0,212,170,0.25);
+      border-radius: 100px;
+      padding: 6px 16px;
+      margin-bottom: 28px;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .hero-badge-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--teal);
+      box-shadow: 0 0 8px var(--teal);
+      animation: pulse 1.5s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+    }
+
+    .hero-badge span {
+      color: var(--teal);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(56px, 8vw, 96px);
+      font-weight: 900;
+      text-transform: uppercase;
+      line-height: 0.95;
+      letter-spacing: -2px;
+      margin-bottom: 24px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    .hero-title .teal { color: var(--teal); }
+    .hero-title .orange { color: var(--orange); }
+
+    .hero-sub {
+      font-size: 18px;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 480px;
+      margin-bottom: 40px;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 40px;
+      margin-top: 56px;
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+
+    .hero-stat-value {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .hero-stat-label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .hero-stat-divider {
+      width: 1px;
+      background: var(--border);
+      align-self: stretch;
+    }
+
+    /* Hero truck illustration */
+    .hero-truck {
+      position: absolute;
+      right: -20px;
+      bottom: 60px;
+      width: 55%;
+      max-width: 680px;
+      opacity: 0;
+      animation: truckSlide 1s 0.5s ease forwards;
+      z-index: 1;
+    }
+
+    @keyframes truckSlide {
+      from { opacity: 0; transform: translateX(80px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── HOW IT WORKS ── */
+    .section {
+      padding: 100px 48px;
+      position: relative;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--teal);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(36px, 5vw, 56px);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -1px;
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+
+    .section-sub {
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.6;
+      max-width: 500px;
+    }
+
+    .section-header { margin-bottom: 60px; }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+    }
+
+    .step-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s, border-color 0.25s;
+    }
+
+    .step-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--teal);
+    }
+
+    .step-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at top left, var(--teal-glow), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .step-card:hover::before { opacity: 1; }
+
+    .step-number {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 64px;
+      font-weight: 900;
+      color: rgba(0,212,170,0.08);
+      line-height: 1;
+      position: absolute;
+      top: 12px;
+      right: 20px;
+    }
+
+    .step-icon {
+      width: 48px; height: 48px;
+      background: rgba(0,212,170,0.1);
+      border: 1px solid rgba(0,212,170,0.2);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+
+    .step-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -0.3px;
+      margin-bottom: 8px;
+    }
+
+    .step-desc {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ── SERVICES ── */
+    .services-bg {
+      background: linear-gradient(180deg, var(--black) 0%, var(--dark) 50%, var(--black) 100%);
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .service-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      transition: all 0.25s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .service-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--orange);
+      box-shadow: 0 12px 40px var(--orange-glow);
+    }
+
+    .service-emoji {
+      font-size: 40px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .service-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -0.3px;
+      margin-bottom: 8px;
+    }
+
+    .service-desc {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .service-price {
+      font-size: 13px;
+      color: var(--teal);
+      font-weight: 600;
+    }
+
+    /* ── DUAL CTA SPLIT ── */
+    .split-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      min-height: 480px;
+    }
+
+    .split-panel {
+      padding: 72px 56px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .split-panel.customer {
+      background: linear-gradient(135deg, #0D1A16, #080C0B);
+      border-right: 1px solid var(--border);
+    }
+
+    .split-panel.provider {
+      background: linear-gradient(135deg, #1A1205, #080C0B);
+    }
+
+    .split-icon {
+      font-size: 56px;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .split-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 42px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -1px;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .split-sub {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+      max-width: 340px;
+    }
+
+    .split-features {
+      list-style: none;
+      margin-bottom: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .split-features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .split-features li::before {
+      content: '✓';
+      width: 20px; height: 20px;
+      background: rgba(0,212,170,0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--teal);
+      font-size: 11px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .testimonial-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      transition: transform 0.25s;
+    }
+
+    .testimonial-card:hover { transform: translateY(-3px); }
+
+    .testimonial-stars {
+      color: #F0C040;
+      font-size: 16px;
+      margin-bottom: 14px;
+      letter-spacing: 2px;
+    }
+
+    .testimonial-text {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .testimonial-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 800;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .testimonial-name {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .testimonial-role {
+      font-size: 12px;
+      color: var(--dim);
+    }
+
+    /* ── FINAL CTA ── */
+    .final-cta {
+      text-align: center;
+      padding: 120px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .final-cta-bg {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 70% at 50% 50%, rgba(0,212,170,0.06) 0%, transparent 70%);
+    }
+
+    .final-cta-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(48px, 7vw, 80px);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -2px;
+      line-height: 0.95;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .final-cta-sub {
+      color: var(--muted);
+      font-size: 18px;
+      margin-bottom: 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .final-cta-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .footer-copy {
+      color: var(--dim);
+      font-size: 13px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--dim);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--teal); }
+
+    /* ── CITY BADGE ── */
+    .city-strip {
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 48px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    .city-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .city-list {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .city-tag {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--dim);
+    }
+
+    .city-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--teal);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+      .hero { padding: 100px 24px 60px; }
+      .hero-truck { display: none; }
+      .section { padding: 72px 24px; }
+      .split-section { grid-template-columns: 1fr; }
+      .split-panel { padding: 48px 28px; }
+      .split-panel.customer { border-right: none; border-bottom: 1px solid var(--border); }
+      footer { padding: 32px 24px; flex-direction: column; align-items: flex-start; }
+      .city-strip { padding: 16px 24px; }
+      .final-cta { padding: 80px 24px; }
+      .hero-stats { gap: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ────────────────────────────────────────────────────────────────── -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">🚚</div>
+    <span class="nav-logo-text">Readi<span>Now</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#how-it-works">How It Works</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#movers">For Movers</a></li>
+    <li><a href="#reviews">Reviews</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="#" class="btn btn-outline">Log In</a>
+    <a href="#" class="btn btn-primary">Book Now</a>
+  </div>
+</nav>
+
+<!-- ── HERO ───────────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      <span>Now live in Austin, TX — 24 movers nearby</span>
+    </div>
+
+    <h1 class="hero-title">
+      Moving<br />
+      <span class="teal">Made</span><br />
+      <span class="orange">Instant.</span>
+    </h1>
+
+    <p class="hero-sub">
+      Book a trusted mover or hauler near you in under 60 seconds.
+      Upfront pricing, live GPS tracking, no surprises.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#" class="btn btn-primary btn-lg">📦 Book a Move Now</a>
+      <a href="#movers" class="btn btn-outline btn-lg">🚚 Become a Mover</a>
+    </div>
+
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-value">60<span style="color:var(--teal);font-size:24px">s</span></div>
+        <div class="hero-stat-label">Avg booking time</div>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div>
+        <div class="hero-stat-value">24<span style="color:var(--teal);font-size:24px">/7</span></div>
+        <div class="hero-stat-label">Movers available</div>
+      </div>
+      <div class="hero-stat-divider"></div>
+      <div>
+        <div class="hero-stat-value">4.9<span style="color:#F0C040;font-size:20px">★</span></div>
+        <div class="hero-stat-label">Average rating</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Truck SVG illustration -->
+  <div class="hero-truck">
+    <svg viewBox="0 0 700 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="truckBody" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#00D4AA"/>
+          <stop offset="100%" stop-color="#00A882"/>
+        </linearGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="8" result="blur"/>
+          <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+        </filter>
+      </defs>
+      <!-- Glow shadow -->
+      <ellipse cx="380" cy="330" rx="280" ry="28" fill="#00D4AA" opacity="0.08"/>
+      <!-- Cargo box -->
+      <rect x="60" y="100" width="340" height="200" rx="12" fill="url(#truckBody)" opacity="0.9"/>
+      <!-- Cargo box shading -->
+      <rect x="60" y="100" width="340" height="8" rx="4" fill="white" opacity="0.1"/>
+      <!-- Door lines -->
+      <line x1="60" y1="200" x2="400" y2="200" stroke="#080C0B" stroke-width="3" opacity="0.2"/>
+      <line x1="230" y1="108" x2="230" y2="295" stroke="#080C0B" stroke-width="2" opacity="0.15"/>
+      <!-- READI NOW text on truck -->
+      <text x="140" y="165" font-family="Barlow Condensed, sans-serif" font-size="28" font-weight="900" fill="white" opacity="0.25" text-anchor="middle" letter-spacing="2">READI NOW</text>
+      <!-- Cab -->
+      <rect x="390" y="60" width="240" height="240" rx="16" fill="url(#truckBody)"/>
+      <!-- Windshield -->
+      <rect x="410" y="80" width="130" height="90" rx="8" fill="#080C0B" opacity="0.5"/>
+      <rect x="415" y="85" width="120" height="80" rx="6" fill="#0D1412" opacity="0.4"/>
+      <!-- Windshield reflection -->
+      <rect x="418" y="88" width="40" height="12" rx="3" fill="white" opacity="0.06"/>
+      <!-- Cab details -->
+      <rect x="548" y="90" width="60" height="50" rx="6" fill="#00A882"/>
+      <!-- Undercarriage -->
+      <rect x="60" y="295" width="575" height="30" rx="4" fill="#00A882" opacity="0.5"/>
+      <!-- Wheels -->
+      <circle cx="170" cy="338" r="42" fill="#080C0B"/>
+      <circle cx="170" cy="338" r="30" fill="#00D4AA" opacity="0.6"/>
+      <circle cx="170" cy="338" r="16" fill="#0D1412"/>
+      <circle cx="170" cy="338" r="6" fill="#00D4AA" opacity="0.4"/>
+      <circle cx="490" cy="338" r="42" fill="#080C0B"/>
+      <circle cx="490" cy="338" r="30" fill="#00D4AA" opacity="0.6"/>
+      <circle cx="490" cy="338" r="16" fill="#0D1412"/>
+      <circle cx="490" cy="338" r="6" fill="#00D4AA" opacity="0.4"/>
+      <!-- Headlight -->
+      <rect x="624" y="148" width="40" height="28" rx="6" fill="#FF6B2C" opacity="0.95"/>
+      <rect x="660" y="154" width="30" height="14" rx="4" fill="#FF6B2C" opacity="0.35"/>
+      <!-- Speed lines -->
+      <line x1="0" y1="160" x2="70" y2="160" stroke="#FF6B2C" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
+      <line x1="0" y1="185" x2="50" y2="185" stroke="#FF6B2C" stroke-width="3.5" stroke-linecap="round" opacity="0.6"/>
+      <line x1="0" y1="208" x2="35" y2="208" stroke="#FF6B2C" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/>
+      <line x1="0" y1="228" x2="22" y2="228" stroke="#FF6B2C" stroke-width="1.5" stroke-linecap="round" opacity="0.25"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ── CITY STRIP ─────────────────────────────────────────────────────────── -->
+<div class="city-strip">
+  <span class="city-label">Now serving</span>
+  <div class="city-list">
+    <span class="city-tag"><span class="city-dot"></span>Austin, TX</span>
+    <span class="city-tag" style="opacity:0.4"><span class="city-dot" style="background:#444"></span>Houston (coming soon)</span>
+    <span class="city-tag" style="opacity:0.4"><span class="city-dot" style="background:#444"></span>Dallas (coming soon)</span>
+    <span class="city-tag" style="opacity:0.4"><span class="city-dot" style="background:#444"></span>San Antonio (coming soon)</span>
+  </div>
+</div>
+
+<!-- ── HOW IT WORKS ───────────────────────────────────────────────────────── -->
+<section class="section" id="how-it-works">
+  <div class="section-header">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-title">Book in 3<br /><span style="color:var(--teal)">Simple Steps</span></h2>
+    <p class="section-sub">No phone calls. No waiting. No surprises. Just tap, book, and watch your mover arrive.</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-number">01</div>
+      <div class="step-icon">📍</div>
+      <div class="step-title">Enter Your Locations</div>
+      <p class="step-desc">Tell us where you're moving from and to. Takes less than 30 seconds with address autocomplete.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-number">02</div>
+      <div class="step-icon">💵</div>
+      <div class="step-title">Get An Instant Quote</div>
+      <p class="step-desc">See your upfront price before you commit. No hidden fees, no hourly guesswork. What you see is what you pay.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-number">03</div>
+      <div class="step-icon">🚚</div>
+      <div class="step-title">Your Mover Arrives</div>
+      <p class="step-desc">Match with a verified mover instantly. Track them live on the map as they head your way.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-number">04</div>
+      <div class="step-icon">✅</div>
+      <div class="step-title">Done. Rate & Pay</div>
+      <p class="step-desc">Pay securely in-app when the job's complete. Leave a review and you're done.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── SERVICES ───────────────────────────────────────────────────────────── -->
+<section class="section services-bg" id="services">
+  <div class="section-header">
+    <div class="section-label">Services</div>
+    <h2 class="section-title">Whatever You<br /><span style="color:var(--orange)">Need Moved</span></h2>
+    <p class="section-sub">From a full apartment move to hauling away old junk — we've got a mover for that.</p>
+  </div>
+  <div class="services-grid">
+    <div class="service-card">
+      <span class="service-emoji">🏠</span>
+      <div class="service-name">Full Move</div>
+      <p class="service-desc">Everything from your studio, 2BR, or 4+ bedroom home packed, loaded, and delivered safely.</p>
+      <div class="service-price">From $85 · Instant booking</div>
+    </div>
+    <div class="service-card">
+      <span class="service-emoji">🗑️</span>
+      <div class="service-name">Haul Away</div>
+      <p class="service-desc">Old furniture, appliances, junk — we'll load it up and take it away. No truck rental needed.</p>
+      <div class="service-price">From $60 · Same day available</div>
+    </div>
+    <div class="service-card">
+      <span class="service-emoji">📦</span>
+      <div class="service-name">Delivery</div>
+      <p class="service-desc">Single item pickup and delivery — furniture stores, marketplace pickups, or anything that won't fit in your car.</p>
+      <div class="service-price">From $45 · As fast as 1 hour</div>
+    </div>
+    <div class="service-card">
+      <span class="service-emoji">💪</span>
+      <div class="service-name">Labor Only</div>
+      <p class="service-desc">You've got the truck — we bring the muscle. Hourly labor help for loading, unloading, or rearranging.</p>
+      <div class="service-price">From $55/hr · 2hr minimum</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── DUAL CTA SPLIT ─────────────────────────────────────────────────────── -->
+<section id="movers">
+  <div class="split-section">
+    <div class="split-panel customer">
+      <span class="split-icon">📦</span>
+      <h3 class="split-title">Need a<br /><span style="color:var(--teal)">Mover?</span></h3>
+      <p class="split-sub">Book on-demand right now or schedule ahead. Upfront pricing, verified movers, live tracking.</p>
+      <ul class="split-features">
+        <li>Instant quote — no phone calls</li>
+        <li>Verified & background-checked movers</li>
+        <li>Live GPS tracking from your phone</li>
+        <li>Secure in-app payment</li>
+        <li>Rate your mover after every job</li>
+      </ul>
+      <a href="#" class="btn btn-teal btn-lg" style="align-self:flex-start">Book a Move →</a>
+    </div>
+    <div class="split-panel provider">
+      <span class="split-icon">🚚</span>
+      <h3 class="split-title">Want to<br /><span style="color:var(--orange)">Earn?</span></h3>
+      <p class="split-sub">Set your own hours, accept jobs near you, and get paid after every move. Join hundreds of movers on Readi Now.</p>
+      <ul class="split-features">
+        <li>Earn $20–$35/hour on average</li>
+        <li>Set your own availability</li>
+        <li>Instant or daily payout options</li>
+        <li>Real-time job alerts near you</li>
+        <li>Build your rating & grow your income</li>
+      </ul>
+      <a href="#" class="btn btn-primary btn-lg" style="align-self:flex-start">Become a Mover →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── REVIEWS ────────────────────────────────────────────────────────────── -->
+<section class="section" id="reviews">
+  <div class="section-header">
+    <div class="section-label">Reviews</div>
+    <h2 class="section-title">Real People,<br /><span style="color:var(--teal)">Real Moves</span></h2>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial-card">
+      <div class="testimonial-stars">★★★★★</div>
+      <p class="testimonial-text">"I needed to move out of my apartment same day. Found a mover in 4 minutes, got a quote instantly, and the guy showed up in 20 minutes. Absolute lifesaver."</p>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar" style="background:linear-gradient(135deg,#00D4AA,#00A882)">J</div>
+        <div>
+          <div class="testimonial-name">Jordan M.</div>
+          <div class="testimonial-role">Customer · Austin, TX</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="testimonial-stars">★★★★★</div>
+      <p class="testimonial-text">"I've been a mover on Readi Now for 3 months. I made $2,400 last week alone working 5 days. The app is super easy — jobs just pop up and I accept what I want."</p>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar" style="background:linear-gradient(135deg,#FF6B2C,#FF8F5E)">D</div>
+        <div>
+          <div class="testimonial-name">DeShawn T.</div>
+          <div class="testimonial-role">Provider · 312 jobs completed</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="testimonial-stars">★★★★★</div>
+      <p class="testimonial-text">"Lugg was fully booked and I needed help today. Found Readi Now, got a quote for $95, and Carlos showed up with a van in 8 minutes. Price was exactly what they said."</p>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar" style="background:linear-gradient(135deg,#A855F7,#C084FC)">P</div>
+        <div>
+          <div class="testimonial-name">Priya S.</div>
+          <div class="testimonial-role">Customer · Austin, TX</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FINAL CTA ───────────────────────────────────────────────────────────── -->
+<section class="final-cta">
+  <div class="final-cta-bg"></div>
+  <h2 class="final-cta-title">
+    Ready to<br />
+    <span style="color:var(--teal)">Move?</span>
+  </h2>
+  <p class="final-cta-sub">Join thousands of people who booked their move in under 60 seconds.</p>
+  <div class="final-cta-actions">
+    <a href="#" class="btn btn-primary btn-lg">📦 Book a Move Now</a>
+    <a href="#" class="btn btn-teal btn-lg">🚚 Become a Mover</a>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────────────────── -->
+<footer>
+  <div>
+    <a href="#" class="nav-logo" style="margin-bottom:10px;display:inline-flex">
+      <div class="nav-logo-icon" style="width:30px;height:30px;font-size:14px">🚚</div>
+      <span class="nav-logo-text" style="font-size:18px">Readi<span>Now</span></span>
+    </a>
+    <div class="footer-copy" style="margin-top:8px">© 2025 Readi Now Inc. All rights reserved.</div>
+  </div>
+  <ul class="footer-links">
+    <li><a href="#">How It Works</a></li>
+    <li><a href="#">Services</a></li>
+    <li><a href="#">For Movers</a></li>
+    <li><a href="#">Privacy Policy</a></li>
+    <li><a href="#">Terms of Service</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+</footer>
+
+<script>
+  // Smooth nav background on scroll
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    if (window.scrollY > 60) {
+      nav.style.background = 'rgba(8,12,11,0.97)';
+      nav.style.boxShadow = '0 2px 30px rgba(0,0,0,0.5)';
+    } else {
+      nav.style.background = 'rgba(8,12,11,0.85)';
+      nav.style.boxShadow = 'none';
+    }
+  });
+
+  // Fade in sections on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.step-card, .service-card, .testimonial-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    observer.observe(el);
+  });
+</script>
+
+</body>
+</html>

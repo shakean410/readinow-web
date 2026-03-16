@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Provider Dashboard — Readi Now</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --teal: #00D4AA; --teal-dark: #00A882; --teal-glow: rgba(0,212,170,0.12);
+      --orange: #FF6B2C; --orange-glow: rgba(255,107,44,0.15);
+      --black: #080C0B; --dark: #0D1412; --card: #111918; --border: #1E2D29;
+      --text: #F4FEFA; --muted: #7ABFB0; --dim: #2A5A4A;
+      --green: #2ECC71; --blue: #3B9EFF; --red: #FF4D4D; --yellow: #F0C040;
+      --purple: #A855F7;
+    }
+    body { background: var(--black); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; display: flex; }
+
+    /* SIDEBAR NAV */
+    .sidebar-nav {
+      width: 240px; min-height: 100vh; background: var(--dark);
+      border-right: 1px solid var(--border); display: flex; flex-direction: column;
+      padding: 28px 0; position: fixed; left: 0; top: 0; bottom: 0; z-index: 50;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; padding: 0 24px 28px; text-decoration: none; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+    .nav-logo-icon { width: 34px; height: 34px; background: linear-gradient(135deg, var(--teal), var(--teal-dark)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .nav-logo-text { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; text-transform: uppercase; color: var(--text); }
+    .nav-logo-text span { color: var(--teal); }
+    .nav-items { display: flex; flex-direction: column; gap: 4px; padding: 0 12px; flex: 1; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: none; background: none; width: 100%; font-family: 'Barlow', sans-serif; }
+    .nav-item:hover { background: rgba(0,212,170,0.05); color: var(--text); }
+    .nav-item.active { background: rgba(0,212,170,0.1); color: var(--teal); font-weight: 700; }
+    .nav-item-icon { font-size: 17px; width: 22px; text-align: center; }
+    .nav-item-badge { margin-left: auto; background: var(--orange); color: white; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 100px; }
+    .nav-section-label { font-size: 10px; font-weight: 700; color: var(--dim); letter-spacing: 2px; text-transform: uppercase; padding: 12px 26px 6px; }
+    .nav-bottom { padding: 20px 12px 0; border-top: 1px solid var(--border); margin-top: auto; }
+    .nav-user { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; }
+    .nav-user-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--orange), #FF8F5E); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: white; flex-shrink: 0; }
+    .nav-user-name { font-size: 13px; font-weight: 700; }
+    .nav-user-role { font-size: 11px; color: var(--muted); }
+    .online-badge { margin-left: auto; display: flex; align-items: center; gap: 5px; }
+    .online-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+    /* MAIN */
+    .main { margin-left: 240px; flex: 1; min-height: 100vh; }
+
+    /* TOP BAR */
+    .topbar { background: rgba(8,12,11,0.95); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 16px 36px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 40; }
+    .topbar-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.3px; }
+    .topbar-right { display: flex; align-items: center; gap: 14px; }
+    .online-toggle { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1.5px solid var(--border); border-radius: 100px; padding: 8px 16px; cursor: pointer; transition: all 0.3s; }
+    .online-toggle.on { background: rgba(46,204,113,0.1); border-color: rgba(46,204,113,0.3); }
+    .toggle-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); transition: all 0.3s; }
+    .online-toggle.on .toggle-dot { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .toggle-label { font-size: 13px; font-weight: 700; color: var(--muted); transition: color 0.3s; }
+    .online-toggle.on .toggle-label { color: var(--green); }
+    .notif-btn { width: 38px; height: 38px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; position: relative; }
+    .notif-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--orange); border: 2px solid var(--black); }
+
+    /* CONTENT */
+    .content { padding: 32px 36px; }
+
+    /* PANELS */
+    .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .panel-title { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.3px; }
+    .panel-action { color: var(--teal); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; }
+    .panel-action:hover { text-decoration: underline; }
+
+    /* STATS */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; transition: transform 0.2s; }
+    .stat-card:hover { transform: translateY(-2px); }
+    .stat-icon { font-size: 20px; margin-bottom: 10px; }
+    .stat-label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .stat-value { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 900; line-height: 1; margin-bottom: 4px; }
+    .stat-sub { color: var(--dim); font-size: 12px; }
+
+    /* TWO COLUMN */
+    .two-col { display: grid; grid-template-columns: 1fr 360px; gap: 24px; margin-bottom: 32px; }
+
+    /* JOB CARDS */
+    .jobs-list { display: flex; flex-direction: column; gap: 12px; }
+    .job-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 16px; padding: 18px 20px; transition: all 0.2s; }
+    .job-card:hover { border-color: rgba(0,212,170,0.3); }
+    .job-card.urgent { border-color: rgba(255,107,44,0.4); background: rgba(255,107,44,0.04); }
+    .job-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .job-avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: white; flex-shrink: 0; }
+    .job-name { font-weight: 700; font-size: 15px; }
+    .job-meta { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .job-badges { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-left: auto; }
+    .badge { padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; }
+    .badge-urgent { background: rgba(255,107,44,0.15); color: var(--orange); border: 1px solid rgba(255,107,44,0.3); }
+    .badge-new { background: rgba(0,212,170,0.1); color: var(--teal); border: 1px solid rgba(0,212,170,0.2); }
+    .job-route { background: var(--black); border-radius: 10px; padding: 12px 14px; display: flex; gap: 10px; margin-bottom: 14px; }
+    .route-dots { display: flex; flex-direction: column; align-items: center; gap: 3px; margin-top: 3px; }
+    .dot-b { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
+    .dot-line { flex: 1; width: 1.5px; background: var(--border); min-height: 14px; }
+    .dot-o { width: 8px; height: 8px; border-radius: 2px; background: var(--orange); flex-shrink: 0; }
+    .route-text { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .route-addr-item { font-size: 13px; color: var(--text); }
+    .route-addr-lbl { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
+    .job-footer { display: flex; align-items: center; justify-content: space-between; }
+    .job-price { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900; color: var(--orange); }
+    .job-info-row { display: flex; gap: 14px; align-items: center; }
+    .job-info-pill { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); }
+    .job-actions { display: flex; gap: 8px; }
+    .btn-accept { height: 38px; padding: 0 20px; background: linear-gradient(135deg, var(--teal), var(--teal-dark)); border: none; border-radius: 10px; color: var(--black); font-size: 13px; font-weight: 800; cursor: pointer; font-family: 'Barlow', sans-serif; transition: all 0.2s; }
+    .btn-accept:hover { transform: translateY(-1px); box-shadow: 0 4px 14px var(--teal-glow); }
+    .btn-decline { height: 38px; padding: 0 16px; background: transparent; border: 1.5px solid var(--border); border-radius: 10px; color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Barlow', sans-serif; transition: all 0.2s; }
+    .btn-decline:hover { border-color: var(--red); color: var(--red); }
+    .timer-badge { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; }
+
+    /* EARNINGS CHART */
+    .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+    .chart-bars { display: flex; align-items: flex-end; gap: 8px; height: 120px; margin-top: 16px; }
+    .chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+    .chart-bar { width: 100%; border-radius: 6px 6px 3px 3px; transition: height 0.5s; }
+    .chart-day { font-size: 11px; color: var(--dim); }
+    .chart-total { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 900; color: var(--teal); margin-bottom: 4px; }
+    .chart-sub-label { color: var(--muted); font-size: 12px; }
+
+    /* HISTORY TABLE */
+    .history-table { width: 100%; border-collapse: collapse; }
+    .history-table th { text-align: left; font-size: 11px; font-weight: 700; color: var(--dim); letter-spacing: 1.5px; text-transform: uppercase; padding: 0 0 12px; border-bottom: 1px solid var(--border); }
+    .history-table td { padding: 14px 0; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+    .history-table tr:last-child td { border-bottom: none; }
+    .td-name { font-weight: 600; }
+    .td-type { color: var(--muted); }
+    .td-earn { color: var(--green); font-weight: 700; font-size: 14px; }
+    .td-stars { color: var(--yellow); font-size: 12px; }
+    .td-date { color: var(--dim); font-size: 12px; }
+    .status-pill { padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; }
+    .status-completed { background: rgba(46,204,113,0.1); color: var(--green); }
+
+    /* EMPTY STATE */
+    .empty-state { text-align: center; padding: 48px 24px; }
+    .empty-icon { font-size: 48px; margin-bottom: 14px; }
+    .empty-title { font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+    .empty-sub { color: var(--muted); font-size: 14px; }
+
+    /* ACCEPTED TOAST */
+    .toast { position: fixed; bottom: 32px; right: 32px; background: var(--green); color: white; padding: 14px 22px; border-radius: 14px; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 30px rgba(46,204,113,0.4); transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1); z-index: 200; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar-nav">
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-icon">🚚</div>
+    <span class="nav-logo-text">Readi<span>Now</span></span>
+  </a>
+
+  <div class="nav-items">
+    <div class="nav-section-label">Main</div>
+    <button class="nav-item active" onclick="showTab('dashboard', this)"><span class="nav-item-icon">🏠</span> Dashboard</button>
+    <button class="nav-item" onclick="showTab('jobs', this)"><span class="nav-item-icon">📥</span> Job Feed <span class="nav-item-badge" id="jobBadge">4</span></button>
+    <button class="nav-item" onclick="showTab('earnings', this)"><span class="nav-item-icon">💰</span> Earnings</button>
+    <button class="nav-item" onclick="showTab('history', this)"><span class="nav-item-icon">📋</span> History</button>
+
+    <div class="nav-section-label" style="margin-top:8px">Account</div>
+    <button class="nav-item" onclick="showTab('profile', this)"><span class="nav-item-icon">👤</span> Profile</button>
+    <button class="nav-item" onclick="showTab('settings', this)"><span class="nav-item-icon">⚙️</span> Settings</button>
+  </div>
+
+  <div class="nav-bottom">
+    <div class="nav-user">
+      <div class="nav-user-avatar">D</div>
+      <div><div class="nav-user-name">DeShawn M.</div><div class="nav-user-role">Provider · ★ 4.9</div></div>
+      <div class="online-badge"><div class="online-dot"></div></div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">Dashboard</div>
+    <div class="topbar-right">
+      <div class="online-toggle on" id="onlineToggle" onclick="toggleOnline()">
+        <div class="toggle-dot"></div>
+        <span class="toggle-label" id="toggleLabel">Online</span>
+      </div>
+      <div class="notif-btn">🔔<div class="notif-dot"></div></div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ── DASHBOARD TAB ── -->
+    <div id="tab-dashboard">
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">💵</div>
+          <div class="stat-label">Today</div>
+          <div class="stat-value" style="color:var(--green)">$355</div>
+          <div class="stat-sub">3 jobs completed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📈</div>
+          <div class="stat-label">This Week</div>
+          <div class="stat-value" style="color:var(--blue)">$1,760</div>
+          <div class="stat-sub">12 jobs · up 18%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⭐</div>
+          <div class="stat-label">Rating</div>
+          <div class="stat-value" style="color:var(--yellow)">4.9</div>
+          <div class="stat-sub">312 total reviews</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-label">Acceptance</div>
+          <div class="stat-value" style="color:var(--teal)">94%</div>
+          <div class="stat-sub">Top 10% of movers</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- Incoming jobs preview -->
+        <div>
+          <div class="panel-header">
+            <div class="panel-title">Incoming Jobs</div>
+            <a class="panel-action" onclick="showTab('jobs', document.querySelector('.nav-item:nth-child(3)'))">View all →</a>
+          </div>
+          <div class="jobs-list" id="dashJobsList"></div>
+        </div>
+
+        <!-- Earnings chart -->
+        <div>
+          <div class="panel-header"><div class="panel-title">Weekly Earnings</div></div>
+          <div class="chart-card">
+            <div class="chart-total">$1,760</div>
+            <div class="chart-sub-label">This week · Mon–Sun</div>
+            <div class="chart-bars" id="chartBars"></div>
+          </div>
+
+          <!-- Tip card -->
+          <div style="background:rgba(255,107,44,0.07);border:1px solid rgba(255,107,44,0.2);border-radius:14px;padding:18px;margin-top:16px">
+            <div style="font-size:18px;margin-bottom:8px">💡</div>
+            <div style="font-weight:700;font-size:14px;margin-bottom:4px">Peak hours coming up</div>
+            <div style="color:var(--muted);font-size:13px;line-height:1.5">Friday 4–8 PM is peak in your area. Being online could boost your jobs by 40%.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent history preview -->
+      <div class="panel-header"><div class="panel-title">Recent Jobs</div><a class="panel-action" onclick="showTab('history', null)">Full history →</a></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 24px">
+        <table class="history-table" id="dashHistory"></table>
+      </div>
+    </div>
+
+    <!-- ── JOBS TAB ── -->
+    <div id="tab-jobs" style="display:none">
+      <div class="panel-header">
+        <div class="panel-title">Job Feed</div>
+        <div style="color:var(--muted);font-size:13px"><span style="color:var(--green);font-weight:700">●</span> Live — updating in real time</div>
+      </div>
+      <div class="jobs-list" id="fullJobsList"></div>
+    </div>
+
+    <!-- ── EARNINGS TAB ── -->
+    <div id="tab-earnings" style="display:none">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">💵</div><div class="stat-label">Today</div><div class="stat-value" style="color:var(--green)">$355</div><div class="stat-sub">3 jobs</div></div>
+        <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-label">This Week</div><div class="stat-value" style="color:var(--blue)">$1,760</div><div class="stat-sub">12 jobs</div></div>
+        <div class="stat-card"><div class="stat-icon">🗓️</div><div class="stat-label">This Month</div><div class="stat-value" style="color:var(--teal)">$6,240</div><div class="stat-sub">44 jobs</div></div>
+        <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-label">All Time</div><div class="stat-value" style="color:var(--yellow)">$38,500</div><div class="stat-sub">312 jobs</div></div>
+      </div>
+      <div class="chart-card">
+        <div class="panel-title" style="margin-bottom:16px">Earnings This Week</div>
+        <div class="chart-bars" id="earningsChart"></div>
+      </div>
+      <div style="background:rgba(0,212,170,0.06);border:1.5px solid rgba(0,212,170,0.2);border-radius:16px;padding:24px;margin-top:24px;display:flex;align-items:center;justify-content:space-between">
+        <div><div style="color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Available for Payout</div><div style="font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:900;color:var(--teal)">$1,760.00</div></div>
+        <button style="height:48px;padding:0 28px;background:linear-gradient(135deg,var(--teal),var(--teal-dark));border:none;border-radius:12px;color:var(--black);font-size:14px;font-weight:800;cursor:pointer;font-family:'Barlow',sans-serif">💳 Cash Out</button>
+      </div>
+    </div>
+
+    <!-- ── HISTORY TAB ── -->
+    <div id="tab-history" style="display:none">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px">
+        <table class="history-table" id="fullHistory"></table>
+      </div>
+    </div>
+
+    <!-- ── PROFILE TAB ── -->
+    <div id="tab-profile" style="display:none">
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:24px">
+        <div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;text-align:center">
+            <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#FF8F5E);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:white;margin:0 auto 16px">D</div>
+            <div style="font-weight:800;font-size:18px;margin-bottom:4px">DeShawn Mitchell</div>
+            <div style="color:var(--muted);font-size:13px;margin-bottom:16px">Provider since Jan 2024</div>
+            <div style="display:flex;justify-content:space-around;padding:14px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:14px">
+              <div style="text-align:center"><div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:var(--teal)">312</div><div style="color:var(--muted);font-size:11px">Jobs</div></div>
+              <div style="text-align:center"><div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:var(--yellow)">4.9★</div><div style="color:var(--muted);font-size:11px">Rating</div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)"><span>✅</span> Background check passed</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)"><span>🪪</span> ID verified</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)"><span>🚚</span> Vehicle: 26ft Box Truck</div>
+            </div>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px">
+          <div class="panel-title" style="margin-bottom:24px">Edit Profile</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div><label style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:7px">First Name</label><input type="text" value="DeShawn" style="width:100%;height:48px;background:var(--dark);border:1.5px solid var(--border);border-radius:10px;padding:0 14px;color:var(--text);font-size:14px;font-family:'Barlow',sans-serif;outline:none" /></div>
+            <div><label style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:7px">Last Name</label><input type="text" value="Mitchell" style="width:100%;height:48px;background:var(--dark);border:1.5px solid var(--border);border-radius:10px;padding:0 14px;color:var(--text);font-size:14px;font-family:'Barlow',sans-serif;outline:none" /></div>
+            <div><label style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:7px">Email</label><input type="email" value="deshawn@email.com" style="width:100%;height:48px;background:var(--dark);border:1.5px solid var(--border);border-radius:10px;padding:0 14px;color:var(--text);font-size:14px;font-family:'Barlow',sans-serif;outline:none" /></div>
+            <div><label style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:7px">Phone</label><input type="tel" value="+1 (512) 555-0199" style="width:100%;height:48px;background:var(--dark);border:1.5px solid var(--border);border-radius:10px;padding:0 14px;color:var(--text);font-size:14px;font-family:'Barlow',sans-serif;outline:none" /></div>
+          </div>
+          <button style="margin-top:20px;height:46px;padding:0 24px;background:linear-gradient(135deg,var(--teal),var(--teal-dark));border:none;border-radius:12px;color:var(--black);font-size:14px;font-weight:800;cursor:pointer;font-family:'Barlow',sans-serif">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS TAB ── -->
+    <div id="tab-settings" style="display:none">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:560px;display:flex;flex-direction:column;gap:20px">
+        <div class="panel-title">Settings</div>
+        ${['Push Notifications', 'Job Alerts (SMS)', 'Email Summaries', 'Instant Payout', 'Show Profile Publicly'].map((s, i) => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--border)">
+          <div><div style="font-weight:600;font-size:14px">${s}</div><div style="color:var(--muted);font-size:12px;margin-top:2px">${['Get notified for new jobs','Text alerts for nearby requests','Weekly earnings summary','Get paid immediately after jobs','Allow customers to find your profile'][i]}</div></div>
+          <div onclick="this.classList.toggle('on')" style="width:46px;height:26px;border-radius:13px;background:var(--teal);position:relative;cursor:pointer;transition:background 0.3s">
+            <div style="position:absolute;top:3px;left:23px;width:20px;height:20px;border-radius:50%;background:white;transition:left 0.3s;box-shadow:0 1px 4px rgba(0,0,0,0.3)"></div>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✅ Job accepted! Head to pickup location.</div>
+
+<script>
+  const JOBS = [
+    { id: 1, name: 'Marcus T.', avatar: 'M', color: '#FF6B2C', type: 'Full Move', size: '3BR', from: '1247 Maple Ave', to: '892 Riverside Dr', price: 185, distance: '1.2 mi', eta: '4 min', urgent: true, timer: 28 },
+    { id: 2, name: 'Priya S.', avatar: 'P', color: '#3B9EFF', type: 'Haul Away', size: 'Small', from: '500 W 2nd St', to: 'Austin Disposal', price: 75, distance: '0.8 mi', eta: '6 min', urgent: false, timer: 55 },
+    { id: 3, name: 'Devon W.', avatar: 'D', color: '#2ECC71', type: 'Delivery', size: 'Single', from: 'IKEA Round Rock', to: '3300 Speedway', price: 60, distance: '2.4 mi', eta: '9 min', urgent: false, timer: 80 },
+    { id: 4, name: 'Sandra K.', avatar: 'S', color: '#A855F7', type: 'Full Move', size: '2BR', from: '2100 E 6th St', to: '4200 S Lamar', price: 145, distance: '3.1 mi', eta: '14 min', urgent: false, timer: 110 },
+  ];
+
+  const HISTORY = [
+    { name: 'Lena H.', type: 'Full Move', earn: 210, rating: 5, date: 'Today, 7:30 AM' },
+    { name: 'Ray B.', type: 'Haul Away', earn: 90, rating: 4, date: 'Yesterday' },
+    { name: 'Tina F.', type: 'Delivery', earn: 55, rating: 5, date: 'Mar 13' },
+    { name: 'James O.', type: 'Labor Only', earn: 110, rating: 5, date: 'Mar 12' },
+    { name: 'Kim P.', type: 'Full Move', earn: 185, rating: 4, date: 'Mar 11' },
+  ];
+
+  const WEEK = [280, 420, 195, 510, 355, 0, 0];
+  const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const MAX = Math.max(...WEEK);
+
+  function renderChart(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = WEEK.map((v, i) => `
+      <div class="chart-bar-wrap">
+        <div class="chart-bar" style="height:${v === 0 ? 4 : Math.round((v/MAX)*100)}%;background:${i === 4 ? 'var(--orange)' : v === 0 ? 'var(--border)' : 'rgba(0,212,170,0.4)'};${i === 4 ? 'box-shadow:0 0 10px rgba(255,107,44,0.3)' : ''}"></div>
+        <div class="chart-day" style="color:${i === 4 ? 'var(--orange)' : 'var(--dim)'};font-weight:${i === 4 ? 700 : 400}">${DAYS[i]}</div>
+      </div>`).join('');
+  }
+
+  function renderJobCard(job, compact = false) {
+    const timerColor = job.timer < 30 ? 'var(--red)' : job.timer < 60 ? 'var(--yellow)' : 'var(--green)';
+    return `
+      <div class="job-card ${job.urgent ? 'urgent' : ''}" id="job-${job.id}">
+        <div class="job-card-header">
+          <div class="job-avatar" style="background:${job.color}">${job.avatar}</div>
+          <div><div class="job-name">${job.name}</div><div class="job-meta">${job.type} · ${job.size} · ${job.distance}</div></div>
+          <div class="job-badges">
+            ${job.urgent ? '<span class="badge badge-urgent">URGENT</span>' : ''}
+            <span class="badge badge-new">NEW</span>
+            <span class="timer-badge" style="color:${timerColor}">⏱ ${job.timer}s</span>
+          </div>
+        </div>
+        ${!compact ? `<div class="job-route">
+          <div class="route-dots"><div class="dot-b"></div><div class="dot-line"></div><div class="dot-o"></div></div>
+          <div class="route-text">
+            <div><div class="route-addr-lbl">Pickup</div><div class="route-addr-item">${job.from}</div></div>
+            <div><div class="route-addr-lbl">Drop-off</div><div class="route-addr-item">${job.to}</div></div>
+          </div>
+        </div>` : ''}
+        <div class="job-footer">
+          <div>
+            <div class="job-price">$${job.price}</div>
+            <div class="job-info-row"><span class="job-info-pill">📍 ${job.distance}</span><span class="job-info-pill">🕐 ${job.eta}</span></div>
+          </div>
+          <div class="job-actions">
+            <button class="btn-decline" onclick="declineJob(${job.id})">✕</button>
+            <button class="btn-accept" onclick="acceptJob(${job.id})">✓ Accept</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderHistoryTable(id, limit = 100) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = `<tr><th>Customer</th><th>Service</th><th>Earned</th><th>Rating</th><th>Date</th><th>Status</th></tr>` +
+      HISTORY.slice(0, limit).map(h => `
+        <tr>
+          <td class="td-name">${h.name}</td>
+          <td class="td-type">${h.type}</td>
+          <td class="td-earn">$${h.earn}</td>
+          <td class="td-stars">${'★'.repeat(h.rating)}</td>
+          <td class="td-date">${h.date}</td>
+          <td><span class="status-pill status-completed">Completed</span></td>
+        </tr>`).join('');
+  }
+
+  let activeJobs = [...JOBS];
+
+  function renderAllJobs() {
+    const dashEl = document.getElementById('dashJobsList');
+    const fullEl = document.getElementById('fullJobsList');
+    if (dashEl) dashEl.innerHTML = activeJobs.slice(0, 2).map(j => renderJobCard(j, true)).join('') || '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">No incoming jobs</div><div class="empty-sub">New requests will appear here</div></div>';
+    if (fullEl) fullEl.innerHTML = activeJobs.map(j => renderJobCard(j, false)).join('') || '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">No jobs right now</div><div class="empty-sub">Go online and stay in your area to receive job requests</div></div>';
+    document.getElementById('jobBadge').textContent = activeJobs.length;
+  }
+
+  function acceptJob(id) {
+    document.getElementById('job-' + id)?.remove();
+    activeJobs = activeJobs.filter(j => j.id !== id);
+    renderAllJobs();
+    showToast();
+  }
+
+  function declineJob(id) {
+    const card = document.getElementById('job-' + id);
+    if (card) { card.style.opacity = '0'; card.style.transform = 'translateX(-20px)'; card.style.transition = 'all 0.3s'; setTimeout(() => { card.remove(); renderAllJobs(); }, 300); }
+    activeJobs = activeJobs.filter(j => j.id !== id);
+  }
+
+  function showToast() {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  function showTab(name, navEl) {
+    document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none');
+    document.getElementById('tab-' + name).style.display = 'block';
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (navEl) navEl.classList.add('active');
+    document.getElementById('topbarTitle').textContent = { dashboard: 'Dashboard', jobs: 'Job Feed', earnings: 'Earnings', history: 'History', profile: 'My Profile', settings: 'Settings' }[name] || name;
+    if (name === 'earnings') renderChart('earningsChart');
+  }
+
+  let isOnline = true;
+  function toggleOnline() {
+    isOnline = !isOnline;
+    const toggle = document.getElementById('onlineToggle');
+    const label = document.getElementById('toggleLabel');
+    toggle.className = 'online-toggle' + (isOnline ? ' on' : '');
+    label.textContent = isOnline ? 'Online' : 'Offline';
+  }
+
+  // Countdown timers
+  setInterval(() => {
+    activeJobs = activeJobs.map(j => ({ ...j, timer: Math.max(0, j.timer - 1) })).filter(j => j.timer > 0);
+    renderAllJobs();
+  }, 1000);
+
+  // Init
+  renderChart('chartBars');
+  renderAllJobs();
+  renderHistoryTable('dashHistory', 3);
+  renderHistoryTable('fullHistory');
+</script>
+
+</body>
+</html>
